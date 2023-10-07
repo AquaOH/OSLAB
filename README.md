@@ -7,3 +7,5 @@ A CSAPP LAB
 
 2. Finish bitXor
 
+3. Finish tmin
+

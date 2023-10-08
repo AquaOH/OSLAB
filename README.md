@@ -17,3 +17,5 @@ A CSAPP LAB
 3. Finish negate
 
 4. Finish isAsciiDigit
+
+5. Finish isLessOrEqual

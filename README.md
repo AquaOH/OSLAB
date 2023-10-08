@@ -19,3 +19,7 @@ A CSAPP LAB
 4. Finish isAsciiDigit
 
 5. Finish isLessOrEqual
+
+6. Finish logicalNeg
+
+7. Update Makefile

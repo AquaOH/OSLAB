@@ -23,4 +23,11 @@ btestexplicit:
 clean:
 	rm -f *.o btest fshow ishow *~
 
+oneshoot:
+	make clean;	\
+	./dlc bits.c;	\
+	make btest;	\
+	./btest bits.c;	\
+	make clean	\
+
 

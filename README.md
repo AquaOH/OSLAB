@@ -13,3 +13,7 @@ A CSAPP LAB
 1. Finish isTmax
 
 2. Finish allOddBits
+
+3. Finish negate
+
+4. Finish isAsciiDigit

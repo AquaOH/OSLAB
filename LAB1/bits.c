@@ -225,7 +225,7 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x+1;
 }
 //3
 /* 
@@ -238,7 +238,13 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+  //下边界为加够了就溢出，比这个大
+  //上边界为加不够就不溢出
+  int downstream = ~0x30+1;
+  int upstream = ~0x39;
+  int leftside = !((downstream+x)>>31); //超过0x30就符号变为0
+  int rightside = !!((upstream+x)>>31); //小于0x39就符号仍然为1
+  return leftside&rightside;
 }
 /* 
  * conditional - same as x ? y : z 

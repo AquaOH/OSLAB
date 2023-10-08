@@ -9,3 +9,7 @@ A CSAPP LAB
 
 3. Finish tmin
 
+### 2023/10/8 Update：
+1. Finish isTmax
+
+2. Finish allOddBits

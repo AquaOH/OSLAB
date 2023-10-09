@@ -23,3 +23,6 @@ A CSAPP LAB
 6. Finish logicalNeg
 
 7. Update Makefile
+
+### 2023/10/9 Update：
+1. Finish howManyBits

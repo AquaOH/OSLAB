@@ -29,3 +29,7 @@ A CSAPP LAB
 
 ### 2023/10/9 Update：
 1. Finish floatScale2
+
+2. Finish floatFloat2Int
+
+3. Congratulations!Finish datalab!

@@ -361,6 +361,28 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+  unsigned sign = ((0x80000000)&uf)>>31;
+  unsigned exp = ((0x7f800000)&uf)>>23;
+  unsigned frac = (0x007fffff)&uf;
+  unsigned base = (frac+0x00800000);//加1后的基底（对于常规数）
+  int bias = (exp-127)-23;//真实需要左移的
+  if(sign==0)
+    sign = 1;
+  else
+    sign = -1;
+  if(exp == 255)
+    return 0x80000000u;//足够大
+  if(exp == 0)
+    return 0;//足够小
+  if(bias <=0){
+    if(bias<=-24)
+      bias = -24;
+    return sign*(base>>(-bias));
+  }
+  else{
+    if(bias>=9)
+      return 0x80000000u;
+    return sign*(base<<bias);
+  }
 }
 // #include "floatPower2.c"

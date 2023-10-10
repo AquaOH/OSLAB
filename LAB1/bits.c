@@ -335,7 +335,18 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+  unsigned sign = (0x80000000)&uf;
+  unsigned exp = (0x7f800000)&uf;
+  unsigned frac = (0x007fffff)&uf;
+    if(exp == 0x7f800000)
+        return uf;  //如果是exp全为255,frac全是0就是无穷，不是就是NaN，都直接return
+    if(exp == 0x00000000){
+        if(frac == 0x00000000)
+            return uf; //exp全为0,frac全为0，则为0，0*2=0，原样不动
+        return (frac<<1)|sign|exp;//exp全为0,frac不全为0，注意到非规格化极小和规格化之间是连续的，即frac第一位为1时，左移会把exp变为非全0，回到规格化
+    }
+    return (exp+0x00800000)|sign|frac;
+
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f

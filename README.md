@@ -18,11 +18,13 @@ A CSAPP LAB
 
 4. Finish isAsciiDigit
 
-5. Finish isLessOrEqual
+5. Finish conditional
 
-6. Finish logicalNeg
+6. Finish isLessOrEqual
 
-7. Update Makefile
+7. Finish logicalNeg
+
+8. Update Makefile
 
 ### 2023/10/9 Update：
 1. Finish howManyBits

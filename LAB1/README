@@ -1,140 +1,153 @@
-***********************
-The CS:APP Data Lab
-Directions to Students
-***********************
+1. bitXor思路
 
-Your goal is to modify your copy of bits.c so that it passes all the
-tests in btest without violating any of the coding guidelines.
+根据德摩根定律,A^B = (A&~B)|(~A&B)
 
+2. tmin思路
 
-*********
-0. Files:
-*********
+最小的INT类即首位1，末31位全为0，故TMIN = 0x1<<31
 
-Makefile	- Makes btest, fshow, and ishow
-README		- This file
-bits.c		- The file you will be modifying and handing in
-bits.h		- Header file
-btest.c		- The main btest program
-  btest.h	- Used to build btest
-  decl.c	- Used to build btest
-  tests.c       - Used to build btest
-  tests-header.c- Used to build btest
-dlc*		- Rule checking compiler binary (data lab compiler)	 
-driver.pl*	- Driver program that uses btest and dlc to autograde bits.c
-Driverhdrs.pm   - Header file for optional "Beat the Prof" contest
-fshow.c		- Utility for examining floating-point representations
-ishow.c		- Utility for examining integer representations
+3. isTmax思路
 
-***********************************************************
-1. Modifying bits.c and checking it for compliance with dlc
-***********************************************************
+设置掩码y = 0x7fffffff
+构造掩码方式为 y = (0x7f<<24)+(0xff<<16)+(0xff<<8)+0xff
+x^y只有在x = Tmax时才为0，其余情况非0
+取反返回即可
 
-IMPORTANT: Carefully read the instructions in the bits.c file before
-you start. These give the coding rules that you will need to follow if
-you want full credit.
+4. allOddBits思路
 
-Use the dlc compiler (./dlc) to automatically check your version of
-bits.c for compliance with the coding guidelines:
+设置掩码y = 0xaaaaaaaa
+构造掩码方式为 y = (0xaa<<24)+(0xaa<<16)+(0xaa<<8)+0xaa
+由于只看奇数次幂
+故得过滤掉偶数次幂,即x&y使得偶数次幂均为0，奇数次幂不变
+随后 (x&y)^y即可
+只有奇数次幂全为1才可输出为0，其余非0
+取反返回即可
 
-       unix> ./dlc bits.c
+5. negate思路
 
-dlc returns silently if there are no problems with your code.
-Otherwise it prints messages that flag any problems.  Running dlc with
-the -e switch:
+补码规则 负数取反加一即可
 
-    	unix> ./dlc -e bits.c  
+6. isAsciiDigit思路
 
-causes dlc to print counts of the number of operators used by each function.
+上界为0x39 下届为0x30
+各取补码
+将x各与其补码相加
+结果符号位为0 表示x大于等于该界限
+结果符号位为1 表示x小于该界限
+故为了满足 0x30 <=x <=0x39
+则上界调整为0x3a
+提取出符号位右移31位即可
+满足结果为1，则{![(~down+1+x)>>31]}&[!!(~up+1+x)>>31]
 
-Once you have a legal solution, you can test it for correctness using
-the ./btest program.
+7. conditional思路
 
-*********************
-2. Testing with btest
-*********************
+x为非0输出y
+x为0输出z
+则令x = !!x;x = ~x+1
+当x为非0时，最终x全为1
+当x为0时,最终x全为0
+输出(x&y)|(~x&z)即可
 
-The Makefile in this directory compiles your version of bits.c with
-additional code to create a program (or test harness) named btest.
+8. isLessOrEqual思路
 
-To compile and run the btest program, type:
+取y的补码
+x+(~y+1)
+此时x大于等于y,结果符号位为0
+x小于y，结果符号位为1
+为了变成小于等于,式子改为x+(~y+1)-1
+右移31位取反再取反返回即可
 
-    unix> make btest
-    unix> ./btest [optional cmd line args]
+9. logicalNeg思路
 
-You will need to recompile btest each time you change your bits.c
-program. When moving from one platform to another, you will want to
-get rid of the old version of btest and generate a new one.  Use the
-commands:
+利用0的补码仍然为0的特点
+x = x|(~x+1)
+显然对于0,最高位为0
+对于非0，其最高位必定1(正数补码为负数，负数补码为正数，取并必定有1)
+右移31位提取最高位即可
+为了让0输出1,非0输出0，再加1返回
 
-    unix> make clean
-    unix> make btest
+10. howManyBits思路
 
-Btest tests your code for correctness by running millions of test
-cases on each function.  It tests wide swaths around well known corner
-cases such as Tmin and zero for integer puzzles, and zero, inf, and
-the boundary between denormalized and normalized numbers for floating
-point puzzles. When btest detects an error in one of your functions,
-it prints out the test that failed, the incorrect result, and the
-expected result, and then terminates the testing for that function.
+运用二分查找的思想
+为了方便查找,应让负数也变成符号位为0，即应取反
+x = ((~(x>>31))&x)|(x>>31&~x) 即可完成该操作，正数保持原样,负数取反
 
-Here are the command line options for btest:
+二分，查找有没有超过16位
+tf = !!(x>>16) 如果小于等于16位，则为0，否则为1
 
-  unix> ./btest -h
-  Usage: ./btest [-hg] [-r <n>] [-f <name> [-1|-2|-3 <val>]*] [-T <time limit>]
-    -1 <val>  Specify first function argument
-    -2 <val>  Specify second function argument
-    -3 <val>  Specify third function argument
-    -f <name> Test only the named function
-    -g        Format output for autograding with no error messages
-    -h        Print this message
-    -r <n>    Give uniform weight of n for all problems
-    -T <lim>  Set timeout limit to lim
+如果超过了，二分超过的16位，没超过，二分没超过的16位
+int b16 = tf << 4 长度超过16位，记录值b16为16，否则为0，代表至少16位
+x = x>>b16 右移动b16位，超过16位则探讨16位以上的，少于16位则探讨16位以下的
 
-Examples:
+b8 b4 b2 b1 同理
 
-  Test all functions for correctness and print out error messages:
-  unix> ./btest
+值得注意的是
+当经过x = x>>b1操作后
+x只会剩下一个原表达式中的数字
+应该令b0 = x,如果该数字为1，则b0为1，否则为0
 
-  Test all functions in a compact form with no error messages:
-  unix> ./btest -g
+最终位数结果为 b16+b8+b4+b2+b1+b0+1 正数多一位补码最高位，负数因为取反未+1，理应再加1，故两个输出表达式一致
 
-  Test function foo for correctness:
-  unix> ./btest -f foo
+11. floatScale2思路
 
-  Test function foo for correctness with specific arguments:
-  unix> ./btest -f foo -1 27 -2 0xf
+  unsigned sign = (0x80<<24)&uf;
+  unsigned exp = ((0x7f<<24)+(0x80<<16))&uf;
+  unsigned frac = ((0x7f<<16)+(0xff<<8)+0xff)&uf;
+  使用三个掩码分别提取出sign exp frac
+  应注意非规格化数
+      if(exp == ((0x7f<<24)+(0x80<<16)))
+        return uf;  //如果是exp全为255,frac全是0就是无穷，不是就是NaN，都直接return
+    if(exp == 0x0){
+        if(frac == 0x0)
+            return uf; //exp全为0,frac全为0，则为0，0*2=0，原样不动
+        return (frac<<1)|sign|exp;//exp全为0,frac不全为0，注意到非规格化极小和规格化之间是连续的，即frac第一位为1时，左移会把exp变为非全0，回到规格化
+    }
 
-Btest does not check your code for compliance with the coding
-guidelines.  Use dlc to do that.
+  剩下的情况就是规格化数
+  乘以2后exp应多加一，加完后按原来float数规则复原即可
+  return (exp+(0x80<<16))|sign|frac; 
 
-*******************
-3. Helper Programs
-*******************
+12. floatFloat2Int思路
 
-We have included the ishow and fshow programs to help you decipher
-integer and floating point representations respectively. Each takes a
-single decimal or hex number as an argument. To build them type:
+使用三个掩码提取出各部分，为了方便计算，sign和exp复原到最简单的int
+unsigned sign = ((0x80<<24)&uf)>>31;
+unsigned exp = (((0x7f<<24)+(0x80<<16))&uf)>>23;
+unsigned frac = ((0x7f<<16)+(0xff<<8)+0xff)&uf;
 
-    unix> make
+同时再定义一个不满足题干要求时应输出的数值
+unsigned notpermit = 0x80 << 24;
 
-Example usages:
+对于常规数，根据规则，应为1+frac代表的小数
+复原至float的frac
+unsigned base = (frac+(0x80<<16))
 
-    unix> ./ishow 0x27
-    Hex = 0x00000027,	Signed = 39,	Unsigned = 39
+同时，2的幂是经过偏移后的，求出该幂，并应对后面base左移需求，额外再减23
+int bias = (exp-127)-23;//真实需要左移的
 
-    unix> ./ishow 27
-    Hex = 0x0000001b,	Signed = 27,	Unsigned = 27
+解析sign,让其在乘法时正确使用
+  if(sign==0)
+    sign = 1;
+  else
+    sign = -1;
 
-    unix> ./fshow 0x15213243
-    Floating point value 3.255334057e-26
-    Bit Representation 0x15213243, sign = 0, exponent = 0x2a, fraction = 0x213243
-    Normalized.  +1.2593463659 X 2^(-85)
+排除非规格数
+  if(exp == 255)
+    return notpermit;//足够大
+  if(exp == 0)
+    return 0;//足够小
 
-    linux> ./fshow 15213243
-    Floating point value 2.131829405e-38
-    Bit Representation 0x00e822bb, sign = 0, exponent = 0x01, fraction = 0x6822bb
-    Normalized.  +1.8135598898 X 2^(-126)
-
-
-
+如果bias <= 0 则右移，否则左移
+base有效数字只有24位，故还应判断bias是否小于等于24 如果小于,显然已经偏移到足够小了，换成int一定会是0，故设置bias为恒定-24即可
+如果bias >0 则左移
+当bias>=9时，将超过int表达范围，此时返回规定的数即可
+综上，为
+  if(bias <=0){
+    if(bias<=-24)
+      bias = -24;
+    return sign*(base>>(-bias));
+  }
+  else{
+    if(bias>=9)
+      return notpermit;
+    return sign*(base<<bias);
+  }

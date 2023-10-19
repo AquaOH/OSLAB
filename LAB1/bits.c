@@ -198,11 +198,8 @@ int tmin(void) {
  *   Rating: 1
  */
 int isTmax(int x) {
-  int i =x+1;
-  x = x+i;
-  x = ~x;
-  i = !i;
-  x = x+i;
+  int y = (0x7f<<24)+(0xff<<16)+(0xff<<8)+0xff;
+  x = x^y;
   return !x;
 }
 /* 
@@ -214,7 +211,8 @@ int isTmax(int x) {
  *   Rating: 2
  */
 int allOddBits(int x) {
-  int a = 0xaaaaaaaa;
+  int a = (0xaa<<24)+(0xaa<<16)+(0xaa<<8)+0xaa
+;
   return !((a&x)^a);
 }
 /* 
@@ -241,7 +239,7 @@ int isAsciiDigit(int x) {
   //下边界为加够了就溢出，比这个大
   //上边界为加不够就不溢出
   int downstream = ~0x30+1;
-  int upstream = ~0x39;
+  int upstream = ~0x3a+1;
   int leftside = !((downstream+x)>>31); //超过0x30就符号变为0
   int rightside = !!((upstream+x)>>31); //小于0x39就符号仍然为1
   return leftside&rightside;
@@ -335,17 +333,17 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  unsigned sign = (0x80000000)&uf;
-  unsigned exp = (0x7f800000)&uf;
-  unsigned frac = (0x007fffff)&uf;
-    if(exp == 0x7f800000)
+  unsigned sign = (0x80<<24)&uf;
+  unsigned exp = ((0x7f<<24)+(0x80<<16))&uf;
+  unsigned frac = ((0x7f<<16)+(0xff<<8)+0xff)&uf;
+    if(exp == ((0x7f<<24)+(0x80<<16)))
         return uf;  //如果是exp全为255,frac全是0就是无穷，不是就是NaN，都直接return
-    if(exp == 0x00000000){
-        if(frac == 0x00000000)
+    if(exp == 0x0){
+        if(frac == 0x0)
             return uf; //exp全为0,frac全为0，则为0，0*2=0，原样不动
         return (frac<<1)|sign|exp;//exp全为0,frac不全为0，注意到非规格化极小和规格化之间是连续的，即frac第一位为1时，左移会把exp变为非全0，回到规格化
     }
-    return (exp+0x00800000)|sign|frac;
+    return (exp+(0x80<<16))|sign|frac;
 
 }
 /* 
@@ -361,17 +359,18 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  unsigned sign = ((0x80000000)&uf)>>31;
-  unsigned exp = ((0x7f800000)&uf)>>23;
-  unsigned frac = (0x007fffff)&uf;
-  unsigned base = (frac+0x00800000);//加1后的基底（对于常规数）
+  unsigned sign = ((0x80<<24)&uf)>>31;
+  unsigned exp = (((0x7f<<24)+(0x80<<16))&uf)>>23;
+  unsigned frac = ((0x7f<<16)+(0xff<<8)+0xff)&uf;
+  unsigned base = (frac+(0x80<<16));//加1后的基底（对于常规数）
+  unsigned notpermit = 0x80 << 24; //不满足题干要求时应输出的数值
   int bias = (exp-127)-23;//真实需要左移的
   if(sign==0)
     sign = 1;
   else
     sign = -1;
   if(exp == 255)
-    return 0x80000000u;//足够大
+    return notpermit;//足够大
   if(exp == 0)
     return 0;//足够小
   if(bias <=0){
@@ -381,7 +380,7 @@ int floatFloat2Int(unsigned uf) {
   }
   else{
     if(bias>=9)
-      return 0x80000000u;
+      return notpermit;
     return sign*(base<<bias);
   }
 }

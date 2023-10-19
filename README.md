@@ -1,6 +1,6 @@
 ### All
 
-A CSAPP LAB
+思路报告部分 在LAB1文件夹 README内
 
 ### 2023/10/7 Update：
 1. Create A Repo
@@ -35,3 +35,5 @@ A CSAPP LAB
 2. Finish floatFloat2Int
 
 3. Congratulations!Finish datalab!
+
+

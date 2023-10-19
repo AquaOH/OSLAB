@@ -1,6 +1,6 @@
 ### All
 
-思路报告部分 在LAB1文件夹 README内
+Create A Repo
 
 ### 2023/10/7 Update：
 1. Create A Repo
